@@ -32,13 +32,20 @@ section.pad{padding:120px 0}
 .ring.t{border-width:6px;border-color:transparent;border-top-color:var(--c);border-bottom-color:var(--p)}
 .core{position:absolute;width:30vmin;height:30vmin;border-radius:50%;background:radial-gradient(circle,#fff 0%,var(--c) 18%,var(--p) 45%,transparent 70%);filter:blur(10px);opacity:.55}
 .beam{position:absolute;left:50%;top:50%;width:2px;height:70vmax;background:linear-gradient(transparent,rgba(34,211,238,.7),transparent);transform-origin:50% 0;opacity:.35}
-.htxt{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;z-index:3}
+.htxt{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;text-align:center;padding:24px 24px 9vh;z-index:3}
 .brand{font:700 13px 'Space Grotesk';letter-spacing:.35em;color:var(--c);margin-bottom:22px}
 .htxt h1{font-size:clamp(40px,8vw,92px);font-weight:700;letter-spacing:-.03em;max-width:12ch;text-shadow:0 0 50px rgba(99,102,241,.7)}
 .htxt p{color:#CBD5E1;font-size:clamp(16px,2vw,21px);margin:22px 0 34px}
 .ctas{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
 .word{position:absolute;inset:0;display:grid;place-items:center;z-index:2;font:700 clamp(48px,15vw,200px)/1 'Space Grotesk';letter-spacing:.04em;color:#fff;opacity:0;text-shadow:0 0 30px var(--c),0 0 80px var(--p),0 0 160px var(--p)}
 .scrollcue{position:absolute;bottom:28px;left:50%;translate:-50% 0;z-index:3;color:var(--m);font-size:13px}
+.tw{position:absolute;left:50%;top:50%;z-index:2;opacity:0;text-align:center;pointer-events:none;will-change:transform,opacity}
+.tw::before{content:"";position:absolute;inset:-60% -30%;background:radial-gradient(closest-side,rgba(34,211,238,.28),transparent);z-index:-1}
+.tw b{display:block;font:700 clamp(20px,5vw,72px)/1 'Space Grotesk';letter-spacing:.06em;color:#E0F7FF;text-shadow:0 0 12px var(--c),0 0 40px var(--p),0 0 90px var(--h)}
+.tw span{display:block;margin-top:8px;font-size:clamp(11px,1.3vw,16px);color:#A5B4FC;letter-spacing:.08em}
+#flash,#fade{position:absolute;inset:0;opacity:0;pointer-events:none}
+#flash{z-index:1;background:radial-gradient(circle at 50% 50%,#fff 0%,#9be7ff 30%,#6366F1 78%)}
+#fade{z-index:5;background:#0B1026}
 
 /* STAGES */
 #stages{height:100vh;height:100svh;position:relative;overflow:hidden;background:radial-gradient(ellipse at center,#141a4a 0%,var(--bg2) 70%)}
@@ -132,7 +139,16 @@ footer{text-align:center;color:var(--m);font-size:13px;padding:24px 24px 40px}
       <a class="btn" href="#dev"><svg class="i" data-i="play"></svg> Watch Introduction</a>
     </div>
   </div>
-  <div class="scrollcue" id="cue">Scroll to enter the hub</div>
+  <div class="tw"><b>VOCABULARY</b><span>Build your word power.</span></div>
+  <div class="tw"><b>GRAMMAR</b><span>Understand the structure.</span></div>
+  <div class="tw"><b>LISTENING</b><span>Train your ears.</span></div>
+  <div class="tw"><b>SPEAKING</b><span>Find your voice.</span></div>
+  <div class="tw"><b>READING</b><span>Explore new ideas.</span></div>
+  <div class="tw"><b>WRITING</b><span>Express yourself.</span></div>
+  <div class="tw"><b>PRONUNCIATION</b><span>Speak more clearly.</span></div>
+  <div class="tw"><b>FLUENCY</b><span>Speak with confidence.</span></div>
+  <div id="flash"></div><div id="fade"></div>
+  <div class="scrollcue" id="cue">Scroll to travel through the tunnel</div>
 </section>
 
 <section id="stages" aria-label="Four skills">
@@ -289,9 +305,7 @@ icons();
 
 /* rings */
 var rings=document.getElementById('rings'),RC=[];
-[[26,''],[38,'d'],[52,'t'],[68,'d'],[86,''],[108,'t'],[134,'d']].forEach(function(r,i){
-  var e=document.createElement('div');e.className='ring '+r[1];e.style.width=e.style.height=r[0]+'vmin';rings.appendChild(e);RC.push(e)});
-gsap.set(RC,{rotationX:function(i){return 58-i*6},transformPerspective:900});
+for(var ri=0;ri<14;ri++){var e=document.createElement('div');e.className='ring '+['','d','t'][ri%3];e.style.width=e.style.height='34vmin';e.style.opacity=0;rings.appendChild(e);RC.push(e)}
 
 /* particles */
 var cv=document.getElementById('stars'),cx=cv.getContext('2d'),P=[],speed=1,W,H;
@@ -310,18 +324,37 @@ draw();
 gsap.registerPlugin(ScrollTrigger);
 if(still){gsap.set('#word',{opacity:1});gsap.set('#stages .stage,.lines line',{opacity:1});document.querySelectorAll('.node').forEach(function(n){n.classList.add('on')})}
 else{
-  var tl=gsap.timeline({defaults:{ease:'none'},scrollTrigger:{trigger:'#hero',start:'top top',end:'+=260%',pin:true,scrub:.8,
-    onUpdate:function(s){speed=1+s.progress*14}}});
+  var tl=gsap.timeline({defaults:{ease:'none'},scrollTrigger:{trigger:'#hero',start:'top top',end:'+=520%',pin:true,scrub:.8,invalidateOnRefresh:true,
+    onUpdate:function(s){speed=1+s.progress*16}}});
+  gsap.set('#core',{scale:.25,opacity:.5});
+  /* tunnel rings stream past the camera */
   RC.forEach(function(r,i){
-    tl.to(r,{scale:2.2+i*1.4,rotation:(i%2?-1:1)*(90+i*70),opacity:i>3?0:1,duration:1},0);
-    tl.to(r,{opacity:0,duration:.35},.65+i*.03);
+    var s=i*.55;
+    tl.fromTo(r,{scale:.08,rotation:i*25},{scale:7,rotation:'+='+(i%2?-60:60),ease:'power2.in',duration:3.2},s)
+      .to(r,{opacity:1,duration:.7},s)
+      .to(r,{opacity:0,duration:.9},s+2.3);
   });
-  tl.to('.beam',{scaleY:1.6,opacity:.8,duration:1},0)
-    .to('#core',{scale:4.5,opacity:1,filter:'blur(30px)',duration:1},0)
-    .to('#htxt',{scale:1.6,opacity:0,filter:'blur(14px)',duration:.4},0)
-    .to('#cue',{opacity:0,duration:.1},0)
-    .fromTo('#word',{opacity:0,scale:.4,filter:'blur(24px)'},{opacity:1,scale:1,filter:'blur(0px)',duration:.5},.55)
-    .to('#word',{scale:1.15,duration:.3},1.05);
+  /* the light at the end of the tunnel */
+  tl.to('.beam',{scaleY:1.6,opacity:.8,duration:10},0)
+    .to('#core',{scale:9,opacity:1,ease:'power3.in',duration:9},0)
+    .to('#htxt',{opacity:0,y:-40,duration:.8},0)
+    .to('#cue',{opacity:0,duration:.3},0)
+    .fromTo('#word',{scale:.1},{scale:1.2,ease:'power3.in',duration:9.3},0)
+    .fromTo('#word',{opacity:.35},{opacity:1,duration:1.5},0);
+  /* skills hang in the tunnel walls at different depths */
+  var D=[[-32,-10],[30,12],[-30,14],[32,-12],[-28,-16],[30,8],[-33,6],[28,-14]],k=function(){return innerWidth<700?.5:1};
+  document.querySelectorAll('.tw').forEach(function(w,i){
+    var s=1+i*.95;
+    gsap.set(w,{transformPerspective:800,rotationY:D[i][0]<0?38:-38,xPercent:-50,yPercent:-50});
+    tl.fromTo(w,{x:0,y:0,scale:.08},{x:function(){return D[i][0]*innerWidth/100*k()},y:function(){return D[i][1]*innerHeight/100},scale:1.7,ease:'power2.in',duration:2.4},s)
+      .to(w,{opacity:1,duration:.7},s)
+      .to(w,{opacity:0,duration:.7},s+1.7)
+      .fromTo(w,{filter:'blur(0px)'},{filter:'blur(6px)',duration:.7},s+1.7);
+  });
+  /* final bloom, then hand over to the next section */
+  tl.fromTo('#flash',{opacity:0},{opacity:.85,ease:'power2.in',duration:1.1},8.5)
+    .to('#word',{opacity:0,duration:.9},9.4)
+    .fromTo('#fade',{opacity:0},{opacity:1,duration:.9},9.5);
   /* inside the hub */
   var st=gsap.timeline({defaults:{ease:'power2.out'},scrollTrigger:{trigger:'#stages',start:'top top',end:'+=220%',pin:true,scrub:.7}});
   st.from('#hubword',{scale:2.2,opacity:0,duration:1});
